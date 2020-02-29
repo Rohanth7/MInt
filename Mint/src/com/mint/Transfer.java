@@ -15,14 +15,15 @@ public class Transfer extends HttpServlet
 {
 	private static final long serialVersionUID=1L;
 	 int balance1,balance2;
-	 String text1,text2;
-	 boolean b1,b2;
+	 String credcheck1=null,credcheck2=null;
+	 
   public void doPost(HttpServletRequest req,HttpServletResponse res) throws IOException {
 	  
 		
 		  String aadhar=req.getParameter("aadhar"); 
 		  String acc=req.getParameter("accountnum");
-		  String benefitacc=req.getParameter("benefitnum");
+		  String benefitaad=req.getParameter("benefitaad");
+		  String benefitacc=req.getParameter("benefitacc");
 		  Integer amount=Integer.parseInt(req.getParameter("amount"));
 		  
 		 
@@ -30,8 +31,8 @@ public class Transfer extends HttpServlet
 		 
 	  PrintWriter out=res.getWriter();
 	  Connection conn=null;
-		Statement st1=null,st2=null;
-		ResultSet rs1=null,rs2=null;
+		Statement st1=null,st2=null,st3=null,st4=null;
+		ResultSet rs1=null,rs2=null,cred1=null,cred2=null;
 		
 		try{
 		
@@ -40,45 +41,63 @@ public class Transfer extends HttpServlet
 			
 			st1=conn.createStatement();
 			st2=conn.createStatement();
-			String qry1="select * from balance Where Aadhar='"+aadhar+"' and Acc='"+acc+"' ";
-			rs1=st1.executeQuery(qry1);
-			rs1.absolute(1);
-		//	b1=rs1.getString(1)!= null;
+			st3=conn.createStatement();
+			st4=conn.createStatement();
 			
-			String qry2="select * from balance Where  Acc='"+benefitacc+"'";
-			rs2=st2.executeQuery(qry2);
-			rs2.absolute(1);
-		//	b2=rs2.getString(1)!= null;
+		
 			
-			if(rs1.getString(1)!= null) {
-			if(rs2.getString(1)!= null) {
-			balance1=Integer.parseInt(rs1.getString(3));
-			if(balance1>=amount) {
-				balance1=balance1-amount;
-				String qry3="update balance set Amount='"+balance1+"' where Aadhar='"+aadhar+"' and Acc='"+acc+"'";
-				st1.executeUpdate(qry3);
-				
-				
-				
-				balance2=Integer.parseInt(rs2.getString(3));
-				balance2=balance2+amount;
-				String qry4="update balance set Amount='"+balance2+"' where Acc='"+benefitacc+"'";
-				st2.executeUpdate(qry4);
-				
-				out.print("<h3>Successfully Transferred");
-			}
-			else {out.print("<h3>Insuffiecient balance</h3>");}
+			String qry1="select COUNT(*) from customer Where Aadhar='"+aadhar+"' and Acc='"+acc+"' ";
+			cred1=st1.executeQuery(qry1);
+			cred1.absolute(1);
 			
+
+			String qry2="select COUNT(*) from customer Where Aadhar='"+benefitaad+"' and Acc='"+benefitacc+"' ";
+			cred2=st2.executeQuery(qry2);
+			cred2.absolute(1);
+
+			credcheck1=cred1.getString(1);
+			credcheck2=cred2.getString(1);
+			
+			
+			
+			
+			if(credcheck1.equals("1") && credcheck2.equals("1")) {
 				
+					String qry3="select * from customer Where Aadhar='"+aadhar+"' and Acc='"+acc+"' ";
+					rs1=st3.executeQuery(qry3);
+					rs1.absolute(1);
+					balance1=Integer.parseInt(rs1.getString(3));
+					
+					if(balance1>=amount) {
+							balance1=balance1-amount;
+							String qry4="update customer set Amount='"+balance1+"' where Aadhar='"+aadhar+"' and Acc='"+acc+"'";
+							st3.executeUpdate(qry4);
+				
+				
+							String qry5="select * from customer Where Aadhar='"+benefitaad+"' and Acc='"+benefitacc+"'";
+							rs2=st4.executeQuery(qry5);
+							rs2.absolute(1);
+							
+							balance2=Integer.parseInt(rs2.getString(3));
+							balance2=balance2+amount;
+							String qry6="update customer set Amount='"+balance2+"' Where Aadhar='"+benefitaad+"' and Acc='"+benefitacc+"'";
+							st4.executeUpdate(qry6);
+				
+							out.print("<h3>Successfully Transferred");
+										}
+					else {out.print("<h3>Insuffiecient balance</h3>");}
+			
+						}
+			else {
+				out.print("<h3>Wrong credentials</h3>");
 			}
-			}
+			
+			
 			
 		}
-		catch(SQLException e){
-			out.print("<h3>Wrong credentials</h3>");}
-
 
 		catch(Exception e){
+			
 			out.print("Error:"+e.getMessage());
 	} 
 	  

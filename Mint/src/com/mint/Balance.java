@@ -32,7 +32,7 @@ public class Balance extends HttpServlet {
 			conn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost:3306/bank", "root", "root");
 			
 			st = conn.createStatement();
-			String qry = "select * from balance Where Aadhar='" + aadhar + "' and Acc='" + acc + "'";
+			String qry = "select * from customer Where Aadhar='" + aadhar + "' and Acc='" + acc + "'";
 			rs = st.executeQuery(qry);
 			rs.next();
 			
