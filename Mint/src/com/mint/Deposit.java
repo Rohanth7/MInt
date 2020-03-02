@@ -61,6 +61,7 @@ public class Deposit extends HttpServlet
 					String qry4="select * from agent Where Aadhar='"+agentaad+"' and Acc='"+agentacc+"' ";
 					rs2=st3.executeQuery(qry4);
 					rs2.next();
+					
 					abalance=Integer.parseInt(rs2.getString(3));
 					abalance=abalance-amount;
 					String qry5="update agent set Amount='"+abalance+"' where Aadhar='"+agentaad+"' and Acc='"+agentacc+"'";
